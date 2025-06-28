@@ -1,0 +1,15 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model Log {
+  id        Int      @id @default(autoincrement())
+  sample    Int
+  i         Float
+  timestamp DateTime
+}
