@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlserver"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -12,4 +12,15 @@ model Log {
   sample    Int
   i         Float
   timestamp DateTime
+  identifier String   
+
+  @@map("logs")
+}
+
+model Indicator {
+  id Int @id @default(autoincrement())
+  status Boolean
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("indicators")
 }
