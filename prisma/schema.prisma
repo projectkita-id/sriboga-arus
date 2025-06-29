@@ -19,7 +19,7 @@ model Log {
 
 model Indicator {
   id Int @id @default(autoincrement())
-  status Boolean
+  i Float
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("indicators")

@@ -18,7 +18,7 @@ interface LogData {
 
 interface IndicatorData {
   id: number;
-  status: boolean;
+  I: number;
 }
 
 app.post("/arus", async (req, res) => {
@@ -70,7 +70,7 @@ app.get("/arus", async (req, res) => {
 
   const formatedIndicators = {
     id: indicators?.id || 0,
-    status: indicators?.status || false,
+    i: indicators?.i || 0,
     updatedAt: indicators?.updatedAt
       ? DateTime.fromJSDate(indicators.updatedAt)
           .setZone("Asia/Jakarta")
@@ -143,17 +143,17 @@ app.post("/indicator", async (req, res) => {
       data.map(async (indicator) => {
         await prisma.indicator.upsert({
           where: { id: indicator.id },
-          update: { status: indicator.status, updatedAt: now },
+          update: { i: indicator.I, updatedAt: now },
           create: {
             id: indicator.id,
-            status: indicator.status,
+            i: indicator.I,
             updatedAt: now,
           },
         });
 
         return {
           id: indicator.id,
-          status: indicator.status,
+          i: indicator.I,
           updatedAt: now,
         };
       })
