@@ -1,6 +1,7 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import express from "express";
 import { v4 as uuidv4 } from "uuid"; // For generating unique identifiers
+import _ from "lodash"; // pastikan install lodash
 
 import { DateTime } from "luxon";
 
@@ -31,6 +32,11 @@ app.post("/arus", async (req, res) => {
 
   console.log("Received data:", data);
 
+  if (!data.find((entry) => entry.I >= 400)) {
+    res.status(200).json({ message: "No data with I > 400 found." });
+    return;
+  }
+
   const uniqueHash = uuidv4();
 
   // Get the base timestamp in Asia/Jakarta timezone
@@ -55,12 +61,27 @@ app.post("/arus", async (req, res) => {
 });
 
 app.get("/arus", async (req, res) => {
-  const logs = await prisma.log.groupBy({
-    by: ["identifier"],
-    _min: {
-      timestamp: true,
+  const rawLogs = await prisma.log.findMany({
+    where: {
+      i: {
+        gte: 400,
+      },
+    },
+    orderBy: {
+      timestamp: "asc",
     },
   });
+
+  // Group by identifier dan ambil log pertama per group (karena sudah di-sort)
+  const grouped = _(rawLogs)
+    .groupBy("identifier")
+    .map((logs) => ({
+      id: logs[0].identifier,
+      timestamp: DateTime.fromJSDate(logs[0].timestamp)
+        .setZone("Asia/Jakarta")
+        .toISO(),
+    }))
+    .value();
 
   const indicators = await prisma.indicator.findFirst({
     orderBy: {
@@ -80,12 +101,7 @@ app.get("/arus", async (req, res) => {
 
   res.status(200).json({
     status: formatedIndicators,
-    arus: logs.map((log) => ({
-      id: log.identifier,
-      timestamp: DateTime.fromJSDate(log._min.timestamp as Date)
-        .setZone("Asia/Jakarta")
-        .toISO(), // → format: 2025-06-29T10:56:00+07:00
-    })),
+    arus: grouped,
   });
 });
 
