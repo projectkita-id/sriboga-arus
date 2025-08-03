@@ -7,69 +7,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Logs1 {
-  id         Int      @id @default(autoincrement())
-  sample     Int
-  i          Float
-  timestamp  DateTime
-  identifier String
+model Log {
+  id        String      @id @default(uuid())
+  sample    Int
+  i         Float
+  timestamp DateTime
+  identifier String   
+  indicator_id Int
 
-  @@map("logs1")
-}
-
-model Logs2 {
-  id         Int      @id @default(autoincrement())
-  sample     Int
-  i          Float
-  timestamp  DateTime
-  identifier String
-
-  @@map("logs2")
-}
-
-model Logs3 {
-  id         Int      @id @default(autoincrement())
-  sample     Int
-  i          Float
-  timestamp  DateTime
-  identifier String
-
-  @@map("logs3")
-}
-
-model Logs4 {
-  id         Int      @id @default(autoincrement())
-  sample     Int
-  i          Float
-  timestamp  DateTime
-  identifier String
-
-  @@map("logs4")
-}
-
-model Logs5 {
-  id         Int      @id @default(autoincrement())
-  sample     Int
-  i          Float
-  timestamp  DateTime
-  identifier String
-
-  @@map("logs5")
-}
-
-model Logs6 {
-  id         Int      @id @default(autoincrement())
-  sample     Int
-  i          Float
-  timestamp  DateTime
-  identifier String
-
-  @@map("logs6")
+  @@map("logs")
 }
 
 model Indicator {
-  id        Int      @id
-  i         Float
+  id Int @id @default(autoincrement())
+  i Float
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("indicators")
