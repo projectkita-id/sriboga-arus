@@ -133,7 +133,6 @@ app.get("/arus/:indicator_id/:identifier", async (req, res) => {
     const formattedLogs = logs.map((log) => ({
       sample: log.sample,
       i: log.i,
-      motor: log.motor,
       timestamp: DateTime.fromJSDate(log.timestamp)
         .setZone("Asia/Jakarta")
         .toISO(), // Format timestamp to ISO string in Asia/Jakarta timezone
@@ -165,25 +164,51 @@ app.post("/indicator", async (req, res) => {
 
     const updatedIndicators = await Promise.all(
       data.map(async (indicator) => {
-        await prisma.indicator.upsert({
+        if (!indicator.id) {
+          throw new Error("Missing required 'id' in indicator input.");
+        }
+
+        const updateData: any = {
+          updatedAt: now,
+          ...(indicator.I !== undefined && { i: indicator.I }),
+          ...(indicator.motor !== undefined && { motor: indicator.motor }),
+        };
+
+        const createData: any = {
+          id: indicator.id,
+          updatedAt: now,
+          ...(indicator.I !== undefined && { i: indicator.I }),
+          ...(indicator.motor !== undefined && { motor: indicator.motor }),
+        };
+
+        const existing = await prisma.indicator.findUnique({
           where: { id: indicator.id },
-          update: { i: indicator.I, motor: indicator.motor, updatedAt: now },
-          create: {
-            id: indicator.id,
-            i: indicator.I,
-            motor: indicator.motor,
-            updatedAt: now,
-          },
         });
+
+        if (existing) {
+          await prisma.indicator.update({
+            where: { id: indicator.id },
+            data: updateData,
+          });
+        } else {
+          if (indicator.I === undefined) {
+            throw new Error("Missing required field 'I' for new indicator.");
+          }
+
+          await prisma.indicator.create({
+            data: createData,
+          });
+        }
 
         return {
           id: indicator.id,
-          i: indicator.I,
-          motor: indicator.motor,
+          i: indicator.I ?? null,
+          motor: indicator.motor ?? null,
           updatedAt: now,
         };
       })
     );
+
 
     res.status(200).json({
       message: "Indicator updated successfully",
@@ -195,22 +220,22 @@ app.post("/indicator", async (req, res) => {
   }
 });
 
-// app.get("/indicator", async (req, res) => {
-//   try {
-//     const indicators = await prisma.indicator.findMany({
-//       orderBy: {
-//         id: "asc", // Sort by ID in ascending order
-//       },
-//     });
+app.get("/indicator", async (req, res) => {
+  try {
+    const indicators = await prisma.indicator.findMany({
+      orderBy: {
+        id: "asc", // Sort by ID in ascending order
+      },
+    });
 
-//     res.status(200).json({
-//       data: indicators,
-//     });
-//   } catch (error) {
-//     console.error("Error fetching indicators:", error);
-//     res.status(500).json({ error: "Failed to fetch indicators" });
-//   }
-// });
+    res.status(200).json({
+      data: indicators,
+    });
+  } catch (error) {
+    console.error("Error fetching indicators:", error);
+    res.status(500).json({ error: "Failed to fetch indicators" });
+  }
+});
 
 // app.get("/indicator/:indicatorId", async (req, res) => {
 //   const { indicatorId } = req.params;

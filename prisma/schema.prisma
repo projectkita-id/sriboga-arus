@@ -21,7 +21,7 @@ model Log {
 model Indicator {
   id        Int      @id @default(autoincrement())
   i         Float
-  motor     String
+  motor     String?
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("indicators")

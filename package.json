@@ -17,6 +17,7 @@
     "express": "^5.1.0",
     "lodash": "^4.17.21",
     "luxon": "^3.6.1",
+    "pm2-windows-startup": "^1.0.3",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
