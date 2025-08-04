@@ -8,19 +8,20 @@ datasource db {
 }
 
 model Log {
-  id        String      @id @default(uuid())
-  sample    Int
-  i         Float
-  timestamp DateTime
-  identifier String   
+  id           String   @id @default(uuid())
+  sample       Int
+  i            Float
+  timestamp    DateTime
+  identifier   String
   indicator_id Int
 
   @@map("logs")
 }
 
 model Indicator {
-  id Int @id @default(autoincrement())
-  i Float
+  id        Int      @id @default(autoincrement())
+  i         Float
+  motor     String
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("indicators")

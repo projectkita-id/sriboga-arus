@@ -22,6 +22,7 @@ interface LogData {
 interface IndicatorData {
   id: number;
   I: number;
+  motor: string;
 }
 
 app.post("/arus/:indicator_id", async (req, res) => {
@@ -81,6 +82,7 @@ app.get("/arus/:indicator_id", async (req, res) => {
     .groupBy("identifier")
     .map((logs) => ({
       id: logs[0].identifier,
+
       timestamp: DateTime.fromJSDate(logs[0].timestamp)
         .setZone("Asia/Jakarta")
         .toISO(),
@@ -96,6 +98,7 @@ app.get("/arus/:indicator_id", async (req, res) => {
   const formatedIndicators = {
     id: indicators?.id || 0,
     i: indicators?.i || 0,
+    motor: indicators?.motor || 0,
     updatedAt: indicators?.updatedAt
       ? DateTime.fromJSDate(indicators.updatedAt)
           .setZone("Asia/Jakarta")
@@ -130,6 +133,7 @@ app.get("/arus/:indicator_id/:identifier", async (req, res) => {
     const formattedLogs = logs.map((log) => ({
       sample: log.sample,
       i: log.i,
+      motor: log.motor,
       timestamp: DateTime.fromJSDate(log.timestamp)
         .setZone("Asia/Jakarta")
         .toISO(), // Format timestamp to ISO string in Asia/Jakarta timezone
@@ -163,10 +167,11 @@ app.post("/indicator", async (req, res) => {
       data.map(async (indicator) => {
         await prisma.indicator.upsert({
           where: { id: indicator.id },
-          update: { i: indicator.I, updatedAt: now },
+          update: { i: indicator.I, motor: indicator.motor, updatedAt: now },
           create: {
             id: indicator.id,
             i: indicator.I,
+            motor: indicator.motor,
             updatedAt: now,
           },
         });
@@ -174,6 +179,7 @@ app.post("/indicator", async (req, res) => {
         return {
           id: indicator.id,
           i: indicator.I,
+          motor: indicator.motor,
           updatedAt: now,
         };
       })
